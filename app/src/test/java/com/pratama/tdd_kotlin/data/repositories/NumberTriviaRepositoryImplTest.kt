@@ -8,7 +8,6 @@ import com.pratama.tdd_kotlin.data.datasources.local.NumberTriviaLocalDatasource
 import com.pratama.tdd_kotlin.data.datasources.remote.NumberTriviaRemoteDatasource
 import com.pratama.tdd_kotlin.data.mapper.NumberTriviaMapper
 import com.pratama.tdd_kotlin.data.model.NumberTriviaModel
-import com.pratama.tdd_kotlin.domain.entities.NumberTrivia
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -57,6 +56,7 @@ class NumberTriviaRepositoryImplTest {
             val numberTriviaModel = NumberTriviaModel(1, "test")
             val numberTriviaDomain = mapper.map(numberTriviaModel)
 
+            whenever(networkInfo.isConnected()).thenReturn(true)
             whenever(remoteDatasource.getConcreteNumberTrivia(1))
                 .thenReturn(numberTriviaModel)
 
@@ -93,6 +93,20 @@ class NumberTriviaRepositoryImplTest {
         whenever(localDatasource.getLastNumberTrivia()).thenReturn(numberTriviaModel)
 
         val result = repository.getRandomNumberTrivia()
+
+        assertEquals(result, Either.Right(numberTrivia))
+    }
+
+    @Test
+    fun `ifOffline getConcreteNumber should return data from local`() = runBlocking {
+        val numberTriviaModel = NumberTriviaModel(1, "test")
+        val numberTrivia = mapper.map(numberTriviaModel)
+
+        whenever(networkInfo.isConnected()).thenReturn(false)
+
+        whenever(localDatasource.getLastNumberTrivia()).thenReturn(numberTriviaModel)
+
+        val result = repository.getConcreteNumberTrivia(1)
 
         assertEquals(result, Either.Right(numberTrivia))
     }
