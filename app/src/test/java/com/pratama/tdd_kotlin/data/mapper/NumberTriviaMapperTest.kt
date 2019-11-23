@@ -15,7 +15,7 @@ class NumberTriviaMapperTest {
     }
 
     @Test
-    fun `test map from numbertrivia model to numbertrivia entities`() {
+    fun `test mapper from numbertrivia model to numbertrivia entities`() {
         val testNumberTriviaModel = NumberTriviaModel(number = 1, text = "test mapper")
 
         val result = mapper.map(testNumberTriviaModel)
