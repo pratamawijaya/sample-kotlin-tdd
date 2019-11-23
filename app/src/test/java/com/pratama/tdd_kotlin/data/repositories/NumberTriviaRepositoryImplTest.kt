@@ -67,4 +67,17 @@ class NumberTriviaRepositoryImplTest {
 
         assertEquals(result, Either.Right(numberTriviaDomain))
     }
+
+    @Test
+    fun `getRandomNumber should return data when remote data is success`() = runBlocking {
+        val numberTriviaModel = NumberTriviaModel(1, "test")
+        val numberTrivia = mapper.map(numberTriviaModel)
+
+        whenever(remoteDatasource.getRandomNumberTrivia()).thenReturn(numberTriviaModel)
+
+        val result = repository.getRandomNumberTrivia()
+
+        assertEquals(result, Either.Right(numberTrivia))
+
+    }
 }
