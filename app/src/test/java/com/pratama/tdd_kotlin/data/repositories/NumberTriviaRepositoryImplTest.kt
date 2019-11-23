@@ -51,23 +51,24 @@ class NumberTriviaRepositoryImplTest {
     }
 
     @Test
-    fun `ifOnline getConcreteNumber should return data when remote data is success`() = runBlocking {
+    fun `ifOnline getConcreteNumber should return data when remote data is success`() =
+        runBlocking {
 
-        val numberTriviaModel = NumberTriviaModel(1, "test")
-        val numberTriviaDomain = mapper.map(numberTriviaModel)
+            val numberTriviaModel = NumberTriviaModel(1, "test")
+            val numberTriviaDomain = mapper.map(numberTriviaModel)
 
-        whenever(remoteDatasource.getConcreteNumberTrivia(1))
-            .thenReturn(numberTriviaModel)
+            whenever(remoteDatasource.getConcreteNumberTrivia(1))
+                .thenReturn(numberTriviaModel)
 
-        val result = repository.getConcreteNumberTrivia(1)
+            val result = repository.getConcreteNumberTrivia(1)
 
-        // assert mapper success
-        assertEquals(numberTriviaModel.number, numberTriviaDomain.number)
+            // assert mapper success
+            assertEquals(numberTriviaModel.number, numberTriviaDomain.number)
 
-        verify(remoteDatasource).getConcreteNumberTrivia(1)
+            verify(remoteDatasource).getConcreteNumberTrivia(1)
 
-        assertEquals(result, Either.Right(numberTriviaDomain))
-    }
+            assertEquals(result, Either.Right(numberTriviaDomain))
+        }
 
     @Test
     fun `ifOnline getRandomNumber  should return data when remote data is success`() = runBlocking {
@@ -80,6 +81,19 @@ class NumberTriviaRepositoryImplTest {
         val result = repository.getRandomNumberTrivia()
 
         assertEquals(result, Either.Right(numberTrivia))
+    }
 
+    @Test
+    fun `ifOffline getRandomNumber should return data from local`() = runBlocking {
+        val numberTriviaModel = NumberTriviaModel(1, "test")
+        val numberTrivia = mapper.map(numberTriviaModel)
+
+
+        whenever(networkInfo.isConnected()).thenReturn(false)
+        whenever(localDatasource.getLastNumberTrivia()).thenReturn(numberTriviaModel)
+
+        val result = repository.getRandomNumberTrivia()
+
+        assertEquals(result, Either.Right(numberTrivia))
     }
 }
