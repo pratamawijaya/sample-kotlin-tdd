@@ -17,7 +17,11 @@ class NumberTriviaRepositoryImpl(
 ) : NumberTriviaRepository {
 
     override suspend fun getRandomNumberTrivia(): Either<Failure, NumberTrivia> {
-        return Either.Right(mapper.map(remoteDatasource.getRandomNumberTrivia()))
+        return if (networkInfo.isConnected()) {
+            Either.Right(mapper.map(remoteDatasource.getRandomNumberTrivia()))
+        } else {
+            Either.Right(mapper.map(localDatasource.getLastNumberTrivia()))
+        }
     }
 
     override suspend fun getConcreteNumberTrivia(number: Int): Either<Failure, NumberTrivia> {

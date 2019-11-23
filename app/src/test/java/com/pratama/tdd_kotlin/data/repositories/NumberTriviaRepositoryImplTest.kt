@@ -47,6 +47,7 @@ class NumberTriviaRepositoryImplTest {
             remoteDatasource = remoteDatasource,
             mapper = mapper
         )
+
     }
 
     @Test
@@ -73,6 +74,7 @@ class NumberTriviaRepositoryImplTest {
         val numberTriviaModel = NumberTriviaModel(1, "test")
         val numberTrivia = mapper.map(numberTriviaModel)
 
+        whenever(networkInfo.isConnected()).thenReturn(true)
         whenever(remoteDatasource.getRandomNumberTrivia()).thenReturn(numberTriviaModel)
 
         val result = repository.getRandomNumberTrivia()
