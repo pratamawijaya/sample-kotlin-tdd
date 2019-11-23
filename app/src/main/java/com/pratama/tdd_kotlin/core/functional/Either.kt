@@ -1,35 +1,44 @@
 package com.pratama.tdd_kotlin.core.functional
 
+//https://gist.github.com/cesarferreira/4a3ca55b7b9c6b2b2a93cc74f9e15f21
 
-// https://raw.githubusercontent.com/android10/Android-CleanArchitecture-Kotlin/master/app/src/main/kotlin/com/fernandocejas/sample/core/functional/Either.kt
+/**
+ * Represents a value of one of two possible types (a disjoint union).
+ * Instances of [Either] are either an instance of [Left] or [Right].
+ * FP Convention dictates that [Left] is used for "failure"
+ * and [Right] is used for "success".
+ *
+ * @see Left
+ * @see Right
+ */
 sealed class Either<out L, out R> {
-    data class Left<out L>(val a: L) : Either<L, Nothing>()
-    data class Right<out R>(val b: R) : Either<Nothing, R>()
+    /** * Represents the left side of [Either] class which by convention is a "Failure". */
+    data class Left<out L>(val left: L) : Either<L, Nothing>()
+
+    /** * Represents the right side of [Either] class which by convention is a "Success". */
+    data class Right<out R>(val right: R) : Either<Nothing, R>()
 
     val isRight get() = this is Right<R>
     val isLeft get() = this is Left<L>
 
-    fun <L> left(a: L) = Either.Left(a)
-    fun <R> right(b: R) = Either.Right(b)
+    fun <L> left(left: L) = Left(left)
+    fun <R> right(right: R) = Right(right)
 
     fun either(fnL: (L) -> Any, fnR: (R) -> Any): Any =
         when (this) {
-            is Left -> fnL(a)
-            is Right -> fnR(b)
+            is Left -> fnL(left)
+            is Right -> fnR(right)
         }
-
 }
 
-// Credits to Alex Hart -> https://proandroiddev.com/kotlins-nothing-type-946de7d464fb
-// Composes 2 functions
 fun <A, B, C> ((A) -> B).c(f: (B) -> C): (A) -> C = {
     f(this(it))
 }
 
 fun <T, L, R> Either<L, R>.flatMap(fn: (R) -> Either<L, T>): Either<L, T> =
     when (this) {
-        is Either.Left -> Either.Left(a)
-        is Either.Right -> fn(b)
+        is Either.Left -> Either.Left(left)
+        is Either.Right -> fn(right)
     }
 
 fun <T, L, R> Either<L, R>.map(fn: (R) -> (T)): Either<L, T> = this.flatMap(fn.c(::right))
