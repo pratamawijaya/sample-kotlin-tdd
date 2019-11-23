@@ -14,7 +14,9 @@ jobs:
         with:
           java-version: 1.8
       - name: Run Check
-        run: ./gradlew check
+        run: ./gradlew check jacocoTestReport
+      - name: Upload codecoverage
+        run: bash <(curl -s https://codecov.io/bash)
 
   build:
     name: Build Apk

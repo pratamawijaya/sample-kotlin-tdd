@@ -2,6 +2,8 @@ package com.pratama.tdd_kotlin.data.repositories
 
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import com.pratama.tdd_kotlin.core.data.Result
+import com.pratama.tdd_kotlin.core.error.Failure
 import com.pratama.tdd_kotlin.core.functional.Either
 import com.pratama.tdd_kotlin.core.network.NetworkInfo
 import com.pratama.tdd_kotlin.data.datasources.local.NumberTriviaLocalDatasource
@@ -67,7 +69,7 @@ class NumberTriviaRepositoryImplTest {
 
             verify(remoteDatasource).getConcreteNumberTrivia(1)
 
-            assertEquals(result, Either.Right(numberTriviaDomain))
+            assertEquals(result, Result.Success(numberTriviaDomain))
         }
 
     @Test
@@ -80,7 +82,7 @@ class NumberTriviaRepositoryImplTest {
 
         val result = repository.getRandomNumberTrivia()
 
-        assertEquals(result, Either.Right(numberTrivia))
+        assertEquals(result, Result.Success(numberTrivia))
     }
 
     @Test
@@ -94,7 +96,7 @@ class NumberTriviaRepositoryImplTest {
 
         val result = repository.getRandomNumberTrivia()
 
-        assertEquals(result, Either.Right(numberTrivia))
+        assertEquals(result, Result.Success(numberTrivia))
     }
 
     @Test
@@ -108,6 +110,6 @@ class NumberTriviaRepositoryImplTest {
 
         val result = repository.getConcreteNumberTrivia(1)
 
-        assertEquals(result, Either.Right(numberTrivia))
+        assertEquals(result, Result.Success(numberTrivia))
     }
 }

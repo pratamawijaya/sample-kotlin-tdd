@@ -1,5 +1,6 @@
 package com.pratama.tdd_kotlin.data.repositories
 
+import com.pratama.tdd_kotlin.core.data.Result
 import com.pratama.tdd_kotlin.core.error.Failure
 import com.pratama.tdd_kotlin.core.functional.Either
 import com.pratama.tdd_kotlin.core.network.NetworkInfo
@@ -16,21 +17,29 @@ class NumberTriviaRepositoryImpl(
     val remoteDatasource: NumberTriviaRemoteDatasource
 ) : NumberTriviaRepository {
 
-    override suspend fun getRandomNumberTrivia(): Either<Failure, NumberTrivia> {
+    override suspend fun getRandomNumberTrivia(): Result<NumberTrivia> {
         return if (networkInfo.isConnected()) {
-            Either.Right(mapper.map(remoteDatasource.getRandomNumberTrivia()))
+            try {
+                Result.Success(mapper.map(remoteDatasource.getRandomNumberTrivia()))
+            } catch (e: Exception) {
+                Result.Error(e)
+            }
         } else {
-            Either.Right(mapper.map(localDatasource.getLastNumberTrivia()))
+            Result.Success(mapper.map(localDatasource.getLastNumberTrivia()))
         }
     }
 
-    override suspend fun getConcreteNumberTrivia(number: Int): Either<Failure, NumberTrivia> {
+    override suspend fun getConcreteNumberTrivia(number: Int): Result<NumberTrivia> {
         return if (networkInfo.isConnected()) {
-            Either.Right(
-                mapper.map(remoteDatasource.getConcreteNumberTrivia(number))
-            )
+            try {
+                Result.Success(
+                    mapper.map(remoteDatasource.getConcreteNumberTrivia(number))
+                )
+            } catch (e: Exception) {
+                Result.Error(e)
+            }
         } else {
-            Either.Right(
+            Result.Success(
                 mapper.map(localDatasource.getLastNumberTrivia())
             )
         }

@@ -3,6 +3,7 @@ package com.pratama.tdd_kotlin.domain.usecases
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
+import com.pratama.tdd_kotlin.core.data.Result
 import com.pratama.tdd_kotlin.core.functional.Either
 import com.pratama.tdd_kotlin.domain.entities.NumberTrivia
 import com.pratama.tdd_kotlin.domain.repositories.NumberTriviaRepository
@@ -45,9 +46,7 @@ class GetConcreteNumberTriviaTest {
         runBlocking {
 
             whenever(repository.getConcreteNumberTrivia(testNumber)).thenReturn(
-                Either.Right(
-                    testNumberTrivia
-                )
+                Result.Success(testNumberTrivia)
             )
 
             val result = getConcreteUseCase.execute(testNumber)
@@ -55,7 +54,7 @@ class GetConcreteNumberTriviaTest {
             verify(repository).getConcreteNumberTrivia(1)
             verifyNoMoreInteractions(repository)
 
-            assertEquals(result, Either.Right(testNumberTrivia))
+            assertEquals(result, Result.Success(testNumberTrivia))
 
         }
     }

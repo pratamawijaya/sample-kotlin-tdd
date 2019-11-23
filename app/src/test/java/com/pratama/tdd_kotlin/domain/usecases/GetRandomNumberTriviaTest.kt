@@ -2,6 +2,7 @@ package com.pratama.tdd_kotlin.domain.usecases
 
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import com.pratama.tdd_kotlin.core.data.Result
 import com.pratama.tdd_kotlin.core.functional.Either
 import com.pratama.tdd_kotlin.core.usecase.UseCase
 import com.pratama.tdd_kotlin.domain.entities.NumberTrivia
@@ -24,9 +25,10 @@ import org.mockito.junit.MockitoJUnitRunner
 class GetRandomNumberTriviaTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private lateinit var getRandomNumberTrivia :GetRandomNumberTrivia
+    private lateinit var getRandomNumberTrivia: GetRandomNumberTrivia
 
-    @Mock private lateinit var repository: NumberTriviaRepository
+    @Mock
+    private lateinit var repository: NumberTriviaRepository
 
     @Before
     fun setUp() {
@@ -45,13 +47,13 @@ class GetRandomNumberTriviaTest {
         val testNumberTrivia = NumberTrivia(number = testNumber, text = "Test Text")
 
         runBlocking {
-            whenever(repository.getRandomNumberTrivia()).thenReturn(Either.Right(testNumberTrivia))
+            whenever(repository.getRandomNumberTrivia()).thenReturn(Result.Success(testNumberTrivia))
 
             val result = getRandomNumberTrivia.execute(UseCase.None())
 
             verify(repository).getRandomNumberTrivia()
 
-            assertEquals(result, Either.Right(testNumberTrivia))
+            assertEquals(result, Result.Success(testNumberTrivia))
         }
     }
 }
