@@ -50,15 +50,6 @@ class NumberTriviaRepositoryImplTest {
     }
 
     @Test
-    fun `getConcreteNumber should check if device online`() = runBlocking {
-        whenever(networkInfo.isConnected()).thenReturn(true)
-
-        repository.getConcreteNumberTrivia(1)
-
-        assertTrue(networkInfo.isConnected())
-    }
-
-    @Test
     fun `getConcreteNumber should return data when remote data is success`() = runBlocking {
 
         val numberTriviaModel = NumberTriviaModel(1, "test")
