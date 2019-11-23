@@ -51,7 +51,7 @@ class NumberTriviaRepositoryImplTest {
     }
 
     @Test
-    fun `getConcreteNumber should return data when remote data is success`() = runBlocking {
+    fun `ifOnline getConcreteNumber should return data when remote data is success`() = runBlocking {
 
         val numberTriviaModel = NumberTriviaModel(1, "test")
         val numberTriviaDomain = mapper.map(numberTriviaModel)
@@ -70,7 +70,7 @@ class NumberTriviaRepositoryImplTest {
     }
 
     @Test
-    fun `getRandomNumber should return data when remote data is success`() = runBlocking {
+    fun `ifOnline getRandomNumber  should return data when remote data is success`() = runBlocking {
         val numberTriviaModel = NumberTriviaModel(1, "test")
         val numberTrivia = mapper.map(numberTriviaModel)
 

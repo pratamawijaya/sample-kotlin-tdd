@@ -25,6 +25,14 @@ class NumberTriviaRepositoryImpl(
     }
 
     override suspend fun getConcreteNumberTrivia(number: Int): Either<Failure, NumberTrivia> {
-        return Either.Right(mapper.map(remoteDatasource.getConcreteNumberTrivia(number)))
+        return if (networkInfo.isConnected()) {
+            Either.Right(
+                mapper.map(remoteDatasource.getConcreteNumberTrivia(number))
+            )
+        } else {
+            Either.Right(
+                mapper.map(localDatasource.getLastNumberTrivia())
+            )
+        }
     }
 }
