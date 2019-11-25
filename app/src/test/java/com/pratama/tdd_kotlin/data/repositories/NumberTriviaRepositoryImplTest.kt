@@ -1,6 +1,7 @@
 package com.pratama.tdd_kotlin.data.repositories
 
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.pratama.tdd_kotlin.core.data.Result
 import com.pratama.tdd_kotlin.core.error.Failure
@@ -48,7 +49,14 @@ class NumberTriviaRepositoryImplTest {
             remoteDatasource = remoteDatasource,
             mapper = mapper
         )
+    }
 
+    @Test(expected = java.lang.Exception::class)
+    fun `ifOnline getConcreteNumber should throw error when remote data failure`() = runBlocking {
+        whenever(networkInfo.isConnected()).thenReturn(true)
+        whenever(remoteDatasource.getConcreteNumberTrivia(1)).thenThrow(Exception())
+
+        val result = repository.getConcreteNumberTrivia(1)
     }
 
     @Test
