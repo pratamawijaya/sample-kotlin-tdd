@@ -1,9 +1,11 @@
 package com.pratama.tdd_kotlin.core.data
 
+import com.pratama.tdd_kotlin.core.error.Failure
+
 sealed class Result<out R> {
 
     data class Success<out T>(val data: T) : Result<T>()
-    data class Error(val exception: Exception) : Result<Nothing>()
+    data class Error(val exception: Failure) : Result<Nothing>()
     object Loading : Result<Nothing>()
 
     override fun toString(): String {

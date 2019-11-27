@@ -5,7 +5,7 @@ package com.pratama.tdd_kotlin.core.error
 sealed class Failure {
     object NetworkConnection : Failure()
     object ServerError : Failure()
+
+    /** * Extend this class for feature specific failures.*/
+    abstract class FeatureFailure : Failure()
 }
-
-
-object ErrorHttp : Throwable()

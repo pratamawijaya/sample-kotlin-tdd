@@ -22,7 +22,7 @@ class NumberTriviaRepositoryImpl(
             try {
                 Result.Success(mapper.map(remoteDatasource.getRandomNumberTrivia()))
             } catch (e: Exception) {
-                Result.Error(e)
+                Result.Error(Failure.ServerError)
             }
         } else {
             Result.Success(mapper.map(localDatasource.getLastNumberTrivia()))
@@ -36,7 +36,7 @@ class NumberTriviaRepositoryImpl(
                     mapper.map(remoteDatasource.getConcreteNumberTrivia(number))
                 )
             } catch (e: Exception) {
-                Result.Error(e)
+                Result.Error(Failure.ServerError)
             }
         } else {
             Result.Success(
