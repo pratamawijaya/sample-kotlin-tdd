@@ -1,9 +1,8 @@
 package com.pratama.tdd_kotlin.data.repositories
 
-import com.nhaarman.mockitokotlin2.given
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import com.pratama.tdd_kotlin.core.data.Result
+import com.pratama.tdd_kotlin.core.error.Failure
 import com.pratama.tdd_kotlin.core.network.NetworkInfo
 import com.pratama.tdd_kotlin.data.datasources.local.NumberTriviaLocalDatasource
 import com.pratama.tdd_kotlin.data.datasources.remote.NumberTriviaRemoteDatasource
@@ -13,14 +12,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.setMain
-import org.amshove.kluent.shouldEqual
-import org.amshove.kluent.shouldEqualTo
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.stubbing.Answer
 
 @RunWith(MockitoJUnitRunner::class)
 class NumberTriviaRepositoryImplTest {
@@ -50,6 +48,19 @@ class NumberTriviaRepositoryImplTest {
             mapper = mapper
         )
     }
+
+    @Test
+    fun `ifOnline getConcreteNumber should throw exception when remote data failed`() =
+        runBlocking {
+            given { networkInfo.isConnected() }.willReturn(true)
+            given { remoteDatasource.getConcreteNumberTrivia(1) }
+                .willThrow(Exception::class.java)
+
+
+            val result = repository.getConcreteNumberTrivia(1)
+
+            assertEquals(result, Result.Error(Failure.ServerError))
+        }
 
     @Test
     fun `ifOnline getConcreteNumber should return data when remote data is success`() =
