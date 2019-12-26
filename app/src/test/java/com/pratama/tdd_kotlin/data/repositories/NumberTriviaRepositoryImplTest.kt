@@ -21,12 +21,13 @@ class NumberTriviaRepositoryImplTest {
 
     private val testDispatcher = TestCoroutineDispatcher()
 
-    val localDatasource: NumberTriviaLocalDatasource = mockk()
-    val remoteDatasource: NumberTriviaRemoteDatasource = mockk()
-    val networkInfo: NetworkInfo = mockk()
-    val mapper = NumberTriviaMapper()
+    private val localDatasource: NumberTriviaLocalDatasource = mockk()
+    private val remoteDatasource: NumberTriviaRemoteDatasource = mockk()
+    private val networkInfo: NetworkInfo = mockk()
+    private val mapper = NumberTriviaMapper()
 
-    val repo = NumberTriviaRepositoryImpl(networkInfo, mapper, localDatasource, remoteDatasource)
+    private val repo =
+        NumberTriviaRepositoryImpl(networkInfo, mapper, localDatasource, remoteDatasource)
 
 
     @Before
@@ -34,11 +35,11 @@ class NumberTriviaRepositoryImplTest {
         Dispatchers.setMain(testDispatcher)
     }
 
-    fun getNumberTriviaModel(): NumberTriviaModel {
+    private fun getNumberTriviaModel(): NumberTriviaModel {
         return NumberTriviaModel(1, "test")
     }
 
-    fun getNumberTriviaDomain(): NumberTrivia {
+    private fun getNumberTriviaDomain(): NumberTrivia {
         return mapper.map(getNumberTriviaModel())
     }
 
@@ -70,5 +71,31 @@ class NumberTriviaRepositoryImplTest {
         verify { remoteDatasource.getRandomNumberTrivia() }
 
         assertEquals(result, Result.Success(getNumberTriviaDomain()))
+    }
+
+    @Test
+    fun `ifOffline getConcreteNumber should return from local data`() = runBlocking {
+        every { networkInfo.isConnected() } returns false
+        every { localDatasource.getLastNumberTrivia() } returns getNumberTriviaModel()
+
+        val result = repo.getConcreteNumberTrivia(1)
+
+        verify { localDatasource.getLastNumberTrivia() }
+
+        assertEquals(result, Result.Success(getNumberTriviaDomain()))
+
+    }
+
+    @Test
+    fun `ifOffline getRandomNumber should return from local data`() = runBlocking {
+        every { networkInfo.isConnected() } returns false
+        every { localDatasource.getLastNumberTrivia() } returns getNumberTriviaModel()
+
+        val result = repo.getRandomNumberTrivia()
+
+        verify { localDatasource.getLastNumberTrivia() }
+
+        assertEquals(result, Result.Success(getNumberTriviaDomain()))
+
     }
 }
