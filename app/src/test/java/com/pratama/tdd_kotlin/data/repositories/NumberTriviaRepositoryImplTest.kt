@@ -1,125 +1,101 @@
 package com.pratama.tdd_kotlin.data.repositories
 
-import com.nhaarman.mockitokotlin2.*
 import com.pratama.tdd_kotlin.core.data.Result
-import com.pratama.tdd_kotlin.core.error.Failure
 import com.pratama.tdd_kotlin.core.network.NetworkInfo
 import com.pratama.tdd_kotlin.data.datasources.local.NumberTriviaLocalDatasource
 import com.pratama.tdd_kotlin.data.datasources.remote.NumberTriviaRemoteDatasource
 import com.pratama.tdd_kotlin.data.mapper.NumberTriviaMapper
 import com.pratama.tdd_kotlin.data.model.NumberTriviaModel
+import com.pratama.tdd_kotlin.domain.entities.NumberTrivia
+import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.setMain
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.stubbing.Answer
+import kotlin.test.assertEquals
 
-@RunWith(MockitoJUnitRunner::class)
 class NumberTriviaRepositoryImplTest {
+
 
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private lateinit var repository: NumberTriviaRepositoryImpl
+    private val localDatasource: NumberTriviaLocalDatasource = mockk()
+    private val remoteDatasource: NumberTriviaRemoteDatasource = mockk()
+    private val networkInfo: NetworkInfo = mockk()
+    private val mapper = NumberTriviaMapper()
 
-    @Mock
-    private lateinit var networkInfo: NetworkInfo
-    @Mock
-    private lateinit var localDatasource: NumberTriviaLocalDatasource
-    @Mock
-    private lateinit var remoteDatasource: NumberTriviaRemoteDatasource
-    private lateinit var mapper: NumberTriviaMapper
+    private val repo =
+        NumberTriviaRepositoryImpl(networkInfo, mapper, localDatasource, remoteDatasource)
+
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+    }
 
-        mapper = NumberTriviaMapper()
+    private fun getNumberTriviaModel(): NumberTriviaModel {
+        return NumberTriviaModel(1, "test")
+    }
 
-        repository = NumberTriviaRepositoryImpl(
-            networkInfo = networkInfo,
-            localDatasource = localDatasource,
-            remoteDatasource = remoteDatasource,
-            mapper = mapper
-        )
+    private fun getNumberTriviaDomain(): NumberTrivia {
+        return mapper.map(getNumberTriviaModel())
     }
 
     @Test
-    fun `ifOnline getConcreteNumber should throw exception when remote data failed`() =
+    fun `ifOnline getConcreteNumber should return from remote data`() =
         runBlocking {
-            given { networkInfo.isConnected() }.willReturn(true)
-            given { remoteDatasource.getConcreteNumberTrivia(1) }
-                .willThrow(Exception::class.java)
+            val numberTriviaModel = getNumberTriviaModel()
+            val numberTriviaDomain = getNumberTriviaDomain()
 
+            every { networkInfo.isConnected() } returns true
+            every { remoteDatasource.getConcreteNumberTrivia(1) } returns numberTriviaModel
 
-            val result = repository.getConcreteNumberTrivia(1)
+            val result = repo.getConcreteNumberTrivia(1)
 
-            assertEquals(result, Result.Error(Failure.ServerError))
-        }
+            verify { remoteDatasource.getConcreteNumberTrivia(1) }
 
-    @Test
-    fun `ifOnline getConcreteNumber should return data when remote data is success`() =
-        runBlocking {
-
-            val numberTriviaModel = NumberTriviaModel(1, "test")
-            val numberTriviaDomain = mapper.map(numberTriviaModel)
-
-            given { networkInfo.isConnected() }.willReturn(true)
-            given { remoteDatasource.getConcreteNumberTrivia(1) }
-                .willReturn(numberTriviaModel)
-
-            val result = repository.getConcreteNumberTrivia(1)
-
-            verify(remoteDatasource).getConcreteNumberTrivia(1)
-
-            // assert mapper success
             assertEquals(numberTriviaModel.number, numberTriviaDomain.number)
             assertEquals(result, Result.Success(numberTriviaDomain))
+
         }
 
     @Test
-    fun `ifOnline getRandomNumber  should return data when remote data is success`() = runBlocking {
-        val numberTriviaModel = NumberTriviaModel(1, "test")
-        val numberTrivia = mapper.map(numberTriviaModel)
+    fun `ifOnline getRandomNumber should return from remote data`() = runBlocking {
+        every { networkInfo.isConnected() } returns true
+        every { remoteDatasource.getRandomNumberTrivia() } returns getNumberTriviaModel()
 
-        whenever(networkInfo.isConnected()).thenReturn(true)
-        whenever(remoteDatasource.getRandomNumberTrivia()).thenReturn(numberTriviaModel)
+        val result = repo.getRandomNumberTrivia()
 
-        val result = repository.getRandomNumberTrivia()
+        verify { remoteDatasource.getRandomNumberTrivia() }
 
-        assertEquals(result, Result.Success(numberTrivia))
+        assertEquals(result, Result.Success(getNumberTriviaDomain()))
     }
 
     @Test
-    fun `ifOffline getRandomNumber should return data from local`() = runBlocking {
-        val numberTriviaModel = NumberTriviaModel(1, "test")
-        val numberTrivia = mapper.map(numberTriviaModel)
+    fun `ifOffline getConcreteNumber should return from local data`() = runBlocking {
+        every { networkInfo.isConnected() } returns false
+        every { localDatasource.getLastNumberTrivia() } returns getNumberTriviaModel()
 
+        val result = repo.getConcreteNumberTrivia(1)
 
-        whenever(networkInfo.isConnected()).thenReturn(false)
-        whenever(localDatasource.getLastNumberTrivia()).thenReturn(numberTriviaModel)
+        verify { localDatasource.getLastNumberTrivia() }
 
-        val result = repository.getRandomNumberTrivia()
+        assertEquals(result, Result.Success(getNumberTriviaDomain()))
 
-        assertEquals(result, Result.Success(numberTrivia))
     }
 
     @Test
-    fun `ifOffline getConcreteNumber should return data from local`() = runBlocking {
-        val numberTriviaModel = NumberTriviaModel(1, "test")
-        val numberTrivia = mapper.map(numberTriviaModel)
+    fun `ifOffline getRandomNumber should return from local data`() = runBlocking {
+        every { networkInfo.isConnected() } returns false
+        every { localDatasource.getLastNumberTrivia() } returns getNumberTriviaModel()
 
-        whenever(networkInfo.isConnected()).thenReturn(false)
+        val result = repo.getRandomNumberTrivia()
 
-        whenever(localDatasource.getLastNumberTrivia()).thenReturn(numberTriviaModel)
+        verify { localDatasource.getLastNumberTrivia() }
 
-        val result = repository.getConcreteNumberTrivia(1)
+        assertEquals(result, Result.Success(getNumberTriviaDomain()))
 
-        assertEquals(result, Result.Success(numberTrivia))
     }
 }
