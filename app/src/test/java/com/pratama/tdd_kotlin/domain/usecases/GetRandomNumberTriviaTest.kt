@@ -7,6 +7,7 @@ import com.pratama.tdd_kotlin.domain.repositories.NumberTriviaRepository
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -40,6 +41,8 @@ class GetRandomNumberTriviaTest {
         )
 
         val result = getRandomNumberTrivia.execute(UseCase.None())
+
+        verify { runBlocking { repository.getRandomNumberTrivia() } }
 
         assertEquals(result, Result.Success(testNumberTrivia))
 
